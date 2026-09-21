@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// User model for all types of users
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("PATIENT") // PATIENT, DOCTOR, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patientProfile PatientProfile?
+  doctorProfile  DoctorProfile?
+  
+  // Relations
+  consentsGiven Consent[] @relation("PatientConsents")
+  consentsReceived Consent[] @relation("DoctorConsents")
+
+  records PatientRecord[] @relation("PatientRecords")
+  recordsAuthored PatientRecord[] @relation("DoctorRecords")
+
+  opRegistrations OPRegistration[] @relation("PatientOP")
+  opRegistrationsManaged OPRegistration[] @relation("DoctorOP")
+
+  consultations Consultation[] @relation("PatientConsultations")
+  consultationsAuthored Consultation[] @relation("DoctorConsultations")
+
+  auditLogs AuditLog[] @relation("UserAuditLogs")
+}
+
+model PatientProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  ayushId     String   @unique // The globally unique ID
+  qrToken     String   @unique // The secure token embedded in QR code
+  
+  dateOfBirth DateTime?
+  bloodGroup  String?
+  contact     String?
+}
+
+model DoctorProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  licenseNumber  String   @unique
+  specialization String
+  hospitalName   String?
+}
+
+model Consent {
+  id          String        @id @default(uuid())
+  patientId   String
+  doctorId    String
+  
+  patient     User          @relation("PatientConsents", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      User          @relation("DoctorConsents", fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  status      String        @default("PENDING") // PENDING, APPROVED, REJECTED, EXPIRED, REVOKED
+  permissions String?
+  expiresAt   DateTime?
+  
+  requestedAt DateTime      @default(now())
+  approvedAt  DateTime?
+  revokedAt   DateTime?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model PatientRecord {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  type        String     @default("CONSULTATION") // CONSULTATION, PRESCRIPTION, LAB_REPORT, MEDICINE_UPLOAD
+  fileUrl     String?
+  
+  patientId   String
+  doctorId    String?
+  
+  patient     User       @relation("PatientRecords", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      User?      @relation("DoctorRecords", fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  actorId   String
+  targetId  String?
+  details   String?
+  
+  actor     User     @relation("UserAuditLogs", fields: [actorId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
+
+model Hospital {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  opRegistrations OPRegistration[]
+}
+
+model OPRegistration {
+  id          String   @id @default(uuid())
+  opNumber    String   @unique
+  patientId   String
+  doctorId    String
+  hospitalId  String?
+  
+  department  String?
+  visitType   String?
+  reason      String?
+  status      String   @default("WAITING") // WAITING, IN_CONSULTATION, COMPLETED
+  
+  patient     User     @relation("PatientOP", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      User     @relation("DoctorOP", fields: [doctorId], references: [id], onDelete: Cascade)
+  hospital    Hospital? @relation(fields: [hospitalId], references: [id])
+  
+  consultations Consultation[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Consultation {
+  id               String   @id @default(uuid())
+  patientId        String
+  doctorId         String
+  opRegistrationId String?
+  
+  symptoms         String?
+  vitals           String?
+  observations     String?
+  diagnosis        String?
+  treatment        String?
+  prescription     String?
+  followUpDate     DateTime?
+  notes            String?
+  
+  patient          User     @relation("PatientConsultations", fields: [patientId], references: [id], onDelete: Cascade)
+  doctor           User     @relation("DoctorConsultations", fields: [doctorId], references: [id], onDelete: Cascade)
+  opRegistration   OPRegistration? @relation(fields: [opRegistrationId], references: [id])
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
