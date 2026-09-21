@@ -20,7 +20,7 @@ export default async function AdminDashboard(props: Props) {
   const token = cookieStore.get('auth_token')?.value
 
   // Fetch admin data from backend
-  const res = await fetch('http://localhost:5000/api/admin/dashboard', {
+  const res = await fetch('https://ayush-card-qj9n.vercel.app/api/admin/dashboard', {
     headers: {
       'Cookie': `auth_token=${token}`
     },

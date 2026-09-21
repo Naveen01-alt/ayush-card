@@ -14,7 +14,7 @@ export default async function DoctorPatientsPage() {
   const token = cookieStore.get('auth_token')?.value
 
   // Fetch patients with active consents from backend
-  const res = await fetch('http://localhost:5000/api/doctor/patients', {
+  const res = await fetch('https://ayush-card-qj9n.vercel.app/api/doctor/patients', {
     headers: {
       'Cookie': `auth_token=${token}`
     },

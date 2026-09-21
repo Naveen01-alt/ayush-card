@@ -14,7 +14,7 @@ export default async function DoctorDashboard() {
   const token = cookieStore.get('auth_token')?.value
 
   // Fetch doctor data from backend
-  const res = await fetch('http://localhost:5000/api/doctor/dashboard', {
+  const res = await fetch('https://ayush-card-qj9n.vercel.app/api/doctor/dashboard', {
     headers: {
       'Cookie': `auth_token=${token}`
     },

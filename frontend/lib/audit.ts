@@ -20,7 +20,7 @@ export async function logAudit(
 ) {
   try {
     // Send audit log to backend API instead of direct Prisma insert
-    await fetch('http://localhost:5000/api/audit', {
+    await fetch('https://ayush-card-qj9n.vercel.app/api/audit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -23,7 +23,7 @@ export default async function PatientDashboard(props: Props) {
   const token = cookieStore.get('auth_token')?.value
 
   // Fetch patient data from backend
-  const res = await fetch('http://localhost:5000/api/patient/dashboard', {
+  const res = await fetch('https://ayush-card-qj9n.vercel.app/api/patient/dashboard', {
     headers: {
       'Cookie': `auth_token=${token}`
     },
