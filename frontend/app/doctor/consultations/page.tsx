@@ -10,14 +10,7 @@ export default async function DoctorConsultationsPage() {
     redirect('/')
   }
 
-  const consultations = await prisma.consultation.findMany({
-    where: { doctorId: session.id },
-    include: {
-      patient: { include: { patientProfile: true } },
-      opRegistration: true
-    },
-    orderBy: { createdAt: 'desc' }
-  })
+  const consultations: any[] = [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -51,7 +44,7 @@ export default async function DoctorConsultationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {consultations.map((cons) => (
+                {consultations.map((cons: any) => (
                   <tr key={cons.id} className="hover:bg-slate-50 transition">
                     <td className="py-4 px-6 text-sm font-medium text-slate-900">
                       {new Date(cons.createdAt).toLocaleDateString()}

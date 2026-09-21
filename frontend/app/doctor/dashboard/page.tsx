@@ -125,7 +125,7 @@ export default async function DoctorDashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {activeConsentsList.map((consent) => (
+                {activeConsentsList.map((consent: any) => (
                   <Link 
                     key={consent.id} 
                     href={`/doctor/patient/${consent.patient.patientProfile?.ayushId}`}

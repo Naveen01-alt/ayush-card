@@ -396,7 +396,7 @@ export default async function PatientDashboard(props: Props) {
             <p className="text-slate-500 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">No pending consent requests at this time.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pendingConsents.map(consent => (
+              {pendingConsents.map((consent: any) => (
                 <div key={consent.id} className="border border-amber-200 rounded-2xl p-5 bg-amber-50">
                   <div className="flex items-start gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full bg-amber-200 text-amber-800 flex items-center justify-center font-bold">
@@ -443,7 +443,7 @@ export default async function PatientDashboard(props: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {patient.consentsGiven.filter(c => c.status === 'APPROVED').map(consent => (
+                {patient.consentsGiven.filter((c: any) => c.status === 'APPROVED').map((consent: any) => (
                   <tr key={consent.id} className="hover:bg-white transition">
                     <td className="px-6 py-4 font-bold text-slate-900 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">

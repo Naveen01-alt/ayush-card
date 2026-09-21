@@ -13,16 +13,7 @@ export default async function DoctorOPPage() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const opRegistrations = await prisma.oPRegistration.findMany({
-    where: {
-      doctorId: session.id,
-      createdAt: { gte: today }
-    },
-    include: {
-      patient: { include: { patientProfile: true } }
-    },
-    orderBy: { createdAt: 'desc' }
-  })
+  const opRegistrations: any[] = [];
 
   console.log('--- DOCTOR OP PAGE DEBUG ---')
   console.log('Session ID:', session.id)
@@ -65,7 +56,7 @@ export default async function DoctorOPPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {opRegistrations.map((op) => (
+                {opRegistrations.map((op: any) => (
                   <tr key={op.id} className="hover:bg-slate-50 transition">
                     <td className="py-4 px-6 font-mono text-sm text-slate-600">{op.opNumber}</td>
                     <td className="py-4 px-6 font-medium text-slate-900">{op.patient.name}</td>

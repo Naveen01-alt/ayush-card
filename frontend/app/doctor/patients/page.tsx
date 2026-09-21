@@ -66,7 +66,7 @@ export default async function DoctorPatientsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {consents.map((consent) => (
+                {consents.map((consent: any) => (
                   <tr key={consent.id} className="hover:bg-slate-50 transition">
                     <td className="py-4 px-6 font-medium text-slate-900 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
