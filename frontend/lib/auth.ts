@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-demo-purposes'
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key'
 const secretKey = new TextEncoder().encode(JWT_SECRET)
 
 export interface UserPayload {

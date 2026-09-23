@@ -38,11 +38,11 @@ export default function LandingPage() {
       }
 
       if (data.user.role === 'PATIENT') {
-        router.push('/patient/dashboard')
+        window.location.href = '/patient/dashboard'
       } else if (data.user.role === 'DOCTOR') {
-        router.push('/doctor/dashboard')
+        window.location.href = '/doctor/dashboard'
       } else {
-        router.push('/admin/dashboard')
+        window.location.href = '/admin/dashboard'
       }
     } catch (err: any) {
       setError(err.message)

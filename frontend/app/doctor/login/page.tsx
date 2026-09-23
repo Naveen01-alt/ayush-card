@@ -27,8 +27,7 @@ export default function DoctorLogin() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Login failed')
 
-      router.push('/doctor/dashboard')
-      router.refresh()
+      window.location.href = '/doctor/dashboard'
     } catch (err: any) {
       setError(err.message)
       setLoading(false)
