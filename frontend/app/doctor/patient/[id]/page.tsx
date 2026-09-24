@@ -1,7 +1,8 @@
 import { getSession } from '@/lib/auth'
-
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import PatientViewClient from './PatientViewClient'
 
 export default async function DoctorPatientPage(
@@ -13,63 +14,52 @@ export default async function DoctorPatientPage(
     redirect('/')
   }
 
-  const patientProfile: any = null;
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth_token')?.value
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ayush-card-qj9n.vercel.app';
 
-  if (!patientProfile) {
+  let data: any = null;
+  try {
+    const res = await fetch(`${backendUrl}/api/doctor/patient/${encodeURIComponent(params.id)}`, {
+      headers: {
+        'Cookie': `auth_token=${token}`
+      },
+      cache: 'no-store'
+    });
+
+    if (res.ok) {
+      data = await res.json();
+    }
+  } catch (err) {
+    console.error('Failed to fetch patient data:', err);
+  }
+
+  if (!data || !data.patientProfile) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Patient Not Found</h1>
-        <p className="text-slate-500 mb-6">No patient matches this AYUSH ID.</p>
+      <div className="min-h-screen bg-slate-50 p-6 flex flex-col items-center justify-center text-center">
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 max-w-md w-full">
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Patient Not Found</h1>
+          <p className="text-slate-500 mb-6">No patient matches ID "{params.id}".</p>
+          <Link
+            href="/doctor/scan"
+            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold transition shadow-md"
+          >
+            <ArrowLeft className="w-5 h-5" /> Back to Scanner
+          </Link>
+        </div>
       </div>
     )
   }
 
-  const doctor: any = null;
-
-  const consent: any = null;
-
-  let consentStatus = consent?.status || 'NONE'
-  if (consentStatus === 'APPROVED' && consent?.expiresAt && consent.expiresAt < new Date()) {
-    consentStatus = 'EXPIRED'
-  }
-  const hasActiveConsent = consentStatus === 'APPROVED'
-
-  // SERVER-SIDE OTP PROTECTION
-  const cookieStore = await cookies()
-  const cookieValue = cookieStore.get(`otp_verified_${patientProfile.ayushId}`)?.value
-  const sessionExpiry = cookieValue ? parseInt(cookieValue) : null
-  const otpVerified = sessionExpiry ? sessionExpiry > Date.now() : false
-
-  let history: any[] = []
-  
-  // Only release history if consent is active AND OTP is verified for this session
-  if (hasActiveConsent && otpVerified) {
-    const consultations: any[] = [];
-    const patientRecords: any[] = [];
-
-    console.log('--- DOCTOR PATIENT VIEW ---')
-    console.log('patientId:', patientProfile.userId)
-    console.log('AYUSH ID:', patientProfile.ayushId)
-    console.log('consultation records count:', consultations.length)
-    console.log('medicine/patient records count:', patientRecords.length)
-    
-    // Combine and sort descending
-    history = [...consultations, ...patientRecords].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })
-    
-    console.log('total history records:', history.length)
-  }
-
   return (
     <PatientViewClient 
-      patientProfile={patientProfile} 
-      doctor={doctor}
-      consent={consent}
-      consentStatus={consentStatus}
-      history={history}
-      initialOtpVerified={otpVerified}
-      sessionExpiry={sessionExpiry}
+      patientProfile={data.patientProfile} 
+      doctor={data.doctor}
+      consent={data.consent}
+      consentStatus={data.consentStatus}
+      history={data.history || []}
+      initialOtpVerified={data.otpVerified}
+      sessionExpiry={data.sessionExpiry}
     />
   )
 }

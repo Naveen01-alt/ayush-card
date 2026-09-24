@@ -45,16 +45,37 @@ export default function DoctorScanPage() {
     setLoading(true)
     setError('')
 
+    const cleanToken = token.trim()
+    if (!cleanToken) {
+      setError('Please enter a valid AYUSH ID or scan a card.')
+      setLoading(false)
+      return
+    }
+
     try {
       const res = await fetch('/api/doctor/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ qrToken: token })
+        credentials: 'include',
+        body: JSON.stringify({ qrToken: cleanToken })
       })
-      const data = await res.json()
+
+      let data: any = {}
+      const contentType = res.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json()
+      } else {
+        throw new Error(
+          res.status === 404
+            ? `Patient not found with ID "${cleanToken}". Please check the ID and try again.`
+            : res.status === 401
+            ? 'Session expired. Please log in again.'
+            : 'Unable to reach the server. Please try again later.'
+        )
+      }
 
       if (!res.ok) {
-        throw new Error(data.error || 'Invalid token')
+        throw new Error(data.error || 'Invalid token or patient not found')
       }
       
       if (scannerInstance) {

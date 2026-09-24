@@ -92,4 +92,49 @@ router.post('/consent', async (req, res) => {
   }
 });
 
+router.post('/op', async (req, res) => {
+  try {
+    // @ts-ignore
+    const user = req.user as UserPayload;
+    const { doctorId, reason } = req.body;
+
+    if (!doctorId) {
+      return res.status(400).json({ error: 'Doctor ID is required' });
+    }
+
+    const doctor = await prisma.user.findUnique({
+      where: { id: doctorId },
+      include: { doctorProfile: true }
+    });
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    const today = new Date();
+    const count = await prisma.oPRegistration.count();
+    const opNumber = `OP-${today.getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+
+    const hospital = await prisma.hospital.findFirst();
+
+    const op = await prisma.oPRegistration.create({
+      data: {
+        opNumber,
+        patientId: user.id,
+        doctorId,
+        hospitalId: hospital?.id,
+        department: doctor.doctorProfile?.specialization || 'General Medicine',
+        visitType: 'CONSULTATION',
+        reason: reason || 'General Consultation',
+        status: 'WAITING'
+      }
+    });
+
+    res.json({ success: true, op });
+  } catch (error) {
+    console.error('Error creating OP registration:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

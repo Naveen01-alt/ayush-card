@@ -24,7 +24,7 @@ export function verifyToken(token: string): UserPayload | null {
 }
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies.auth_token;
+  const token = req.cookies?.auth_token || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : undefined);
   if (!token) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
